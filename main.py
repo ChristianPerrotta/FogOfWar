@@ -131,7 +131,7 @@ Text.game_end = game_end
 
 # Change the following variable to True if you
 # want to know easily where the enemies are
-Game.DEBUGGING = True
+Game.DEBUGGING = False
 
 # mainloop
 root.mainloop()
