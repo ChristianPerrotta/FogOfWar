@@ -14,12 +14,15 @@ class Audio:
     select_sound = mixer.Sound(SOUND_PATH + "select.wav")
 
     def death():
+        pass
         mixer.Sound.play(Audio.death_sound)
 
     def change():
+        pass
         mixer.Sound.play(Audio.change_sound)
 
     def select():
+        pass
         mixer.Sound.play(Audio.select_sound)
 
 
@@ -38,11 +41,11 @@ class Game:
         if Game.chapter == 5:
             Game.game_end()
         else:
-            Text.next_chapter.label_obj.grid(row=3, column=0)
+            Text.next_chapter.label_obj.place(relx=0.5, rely=0.9, anchor="center")
 
     @staticmethod
     def game_end():
-        Text.game_end.label_obj.grid(row=3, column=0)
+        Text.game_end.label_obj.place(relx=0.5, rely=0.9, anchor="center")
 
 class Screen:
     def __init__(self, name: str, master: Tk, width, height) -> None:
@@ -243,7 +246,7 @@ class Cell:
 
     def show_enemy(self):
         self.label_obj.configure(image=Cell.enemy_tile)
-        Text.game_over.label_obj.grid(row=3, column=0)
+        Text.game_over.label_obj.place(relx=0.5, rely=0.9, anchor="center")
         Game.lost_or_won = True
         Audio.death()
         Cell.reveal_all()

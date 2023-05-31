@@ -33,14 +33,15 @@ def start_game(*event):
 
 def new_game(*event):
     Audio.select()
-    mixer.music.stop()
+    #mixer.music.stop()
     Game.chapter = 1
     side_screen.frame_obj.grid_remove()
     main_screen.frame_obj.grid_remove()
     new_game_btn.label_obj.grid_remove()
-    next_chapter.label_obj.grid_remove()
-    game_over.label_obj.grid_remove()
-    game_end.label_obj.grid_remove()
+
+    next_chapter.label_obj.place_forget()
+    game_over.label_obj.place_forget()
+    game_end.label_obj.place_forget()
 
     for widget in board_frame.winfo_children():
         widget.destroy()
@@ -55,7 +56,7 @@ def new_game(*event):
 
 def begin_next_chapter(*event):
     Game.chapter += 1
-    next_chapter.label_obj.grid_remove()
+    next_chapter.label_obj.place_forget()
     start_game()
 
 root = Tk()
@@ -80,7 +81,7 @@ side_screen = Screen("side", root, (0.25*WIDTH - 20), (HEIGHT-100))
 main_screen = Screen("main", root, (0.75*WIDTH - 20), (HEIGHT-100))
 
 board_frame = Frame(main_screen.frame_obj)
-board_frame.place(relx=0.5, rely=0.5, anchor="center")
+board_frame.place(relx=0.5, rely=0.4, anchor="center")
 
 # top_screen
 top_screen.frame_obj.columnconfigure(0, weight=1)
@@ -118,19 +119,19 @@ enemies = Text("ENEMIES LEFT\n5", side_screen)
 enemies.label_obj.grid(row=2, column=0)
 Text.enemies_text = enemies
 
-next_chapter = Text("NEXT CHAPTER", side_screen, True)
+next_chapter = Text("NEXT CHAPTER", main_screen, True)
 next_chapter.label_obj.bind("<Button-1>", begin_next_chapter)
 Text.next_chapter = next_chapter
 
-game_over = Text("GAME OVER", side_screen)
+game_over = Text("GAME OVER", main_screen)
 Text.game_over = game_over
 
-game_end = Text("YOU WON!", side_screen)
+game_end = Text("YOU WON!", main_screen)
 Text.game_end = game_end
 
 # Change the following variable to True if you
 # want to know easily where the enemies are
-Game.DEBUGGING = False
+Game.DEBUGGING = True
 
 # mainloop
 root.mainloop()
