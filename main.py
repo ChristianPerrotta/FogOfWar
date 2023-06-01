@@ -9,6 +9,8 @@ def create_board():
     Cell.enemy_count = (BOARD_SIZE + Game.chapter - 1)*(BOARD_SIZE)//(6 - DIFFICULTIES.index(Game.difficulty))
     Cell.randomize_enemies()
     Cell.cell_count = BOARD_SIZE*(BOARD_SIZE + Game.chapter - 1) - Cell.enemy_count
+    Cell.starting_position()
+
     remaining_tiles.label_obj.configure(text=f"REMAINING TILES\n{Cell.cell_count}")
     enemies.label_obj.configure(text=f"ENEMIES LEFT\n{Cell.enemy_count}")
     chapter.label_obj.configure(text=f"CHAPTER {Game.chapter}")

@@ -12,18 +12,23 @@ class Audio:
     death_sound = mixer.Sound(SOUND_PATH + "death.mp3")
     change_sound = mixer.Sound(SOUND_PATH + "change.wav")
     select_sound = mixer.Sound(SOUND_PATH + "select.wav")
+    right_click_sound = mixer.Sound(SOUND_PATH + "right_click.wav")
+    left_click_sound = mixer.Sound(SOUND_PATH + "left_click.wav")
 
     def death():
-        pass
         mixer.Sound.play(Audio.death_sound)
 
     def change():
-        pass
         mixer.Sound.play(Audio.change_sound)
 
     def select():
-        pass
         mixer.Sound.play(Audio.select_sound)
+
+    def right_click():
+        mixer.Sound.play(Audio.right_click_sound)
+    
+    def left_click():
+        mixer.Sound.play(Audio.left_click_sound)
 
 
 class Game:
@@ -103,14 +108,19 @@ class Cell:
 
     default_tile: ImageTk = None
     flag_tile: ImageTk = None
+    uncertain_tile: ImageTk = None
     enemy_tile: ImageTk = None
+    lord_tile: ImageTk = None
+
     tiles: list = []
     numbered_tiles: list = []
 
     def __init__(self, x, y, is_enemy = False):
         self.is_enemy = is_enemy
         self.is_flagged = False
+        self.is_uncertain = False
         self.is_opened = False
+        self.is_lord = False
         self.label_obj: Label = None
 
         self.x = x
@@ -127,13 +137,13 @@ class Cell:
         self.label_obj = lbl
 
     def hover(self, *event):
-        if self.is_opened and not Game.lost_or_won:
+        if self.is_opened and not Game.lost_or_won and not self.is_lord:
             self.label_obj.configure(
                 image=Cell.numbered_tiles[self.surrounded_cells_enemies_length]
                 )
     
     def leave(self, *event):
-        if self.is_opened:
+        if self.is_opened and not self.is_lord:
             self.label_obj.configure(
                 image=Cell.tiles[self.surrounded_cells_enemies_length]
                 )
@@ -151,6 +161,11 @@ class Cell:
             flag = tileset.crop((0, 144, 16, 160))
             bigger_flag = flag.resize((64, 64), resample=Image.Resampling.NEAREST)
             Cell.flag_tile = ImageTk.PhotoImage(bigger_flag)
+
+            # uncertain cell
+            uncertain = tileset.crop((0, 176, 16, 192))
+            bigger_uncertain = uncertain.resize((64, 64), resample=Image.Resampling.NEAREST)
+            Cell.uncertain_tile = ImageTk.PhotoImage(bigger_uncertain)
 
             # enemy cell
             enemy = tileset.crop((
@@ -185,11 +200,21 @@ class Cell:
                 Cell.tiles.append(ImageTk.PhotoImage(bigger_cell))
                 Cell.numbered_tiles.append(ImageTk.PhotoImage(bigger_num_cell))
 
+            # lord tile
+            lord_cell = tileset.crop((
+                16*(Game.chapter) + 16*5*style_offset,
+                16*10,
+                16*(Game.chapter + 1) + 16*5*style_offset,
+                16*11))
+            bigger_lord =  lord_cell.resize((64, 64), resample=Image.Resampling.NEAREST)
+            Cell.lord_tile = ImageTk.PhotoImage(bigger_lord)
+
     def left_click(self, *event):
         if not Game.lost_or_won:
             if self.is_enemy:
                 self.show_enemy()
             else:
+                Audio.left_click()
                 self.show_cell()
                 if self.surrounded_cells_enemies_length == 0:
                     for cell_obj in self.surrounded_cells:
@@ -253,17 +278,36 @@ class Cell:
 
     def right_click(self, *event):
         if not Game.lost_or_won:
-            if not self.is_flagged:
+            Audio.right_click()
+            # if uncertain -> default
+            if self.is_uncertain:
+                self.label_obj.configure(image=Cell.default_tile)
+                self.is_uncertain = False
+            # if flagged -> uncertain
+            elif self.is_flagged:
+                self.label_obj.configure(image=Cell.uncertain_tile)
+                self.is_flagged = False
+                self.is_uncertain = True
+                Cell.enemy_count += 1
+            # if default -> flagged
+            else:
                 self.label_obj.configure(image=Cell.flag_tile)
                 self.is_flagged = True
                 Cell.enemy_count -= 1
-            else:
-                self.label_obj.configure(image=Cell.default_tile)
-                self.is_flagged = False
-                Cell.enemy_count += 1
 
             Text.enemies_text.label_obj.configure(
                 text=f"ENEMIES LEFT\n{Cell.enemy_count}")
+
+    @staticmethod
+    def starting_position():
+        zeroes = [cell for cell in Cell.all
+                  if (cell.surrounded_cells_enemies_length == 0
+                      and not cell.is_enemy)]
+        starting_cell = random.choice(zeroes)
+        starting_cell.is_lord = True
+        starting_cell.is_opened = True
+        starting_cell.label_obj.configure(image=Cell.lord_tile)
+        Cell.cell_count -= 1
 
     @staticmethod
     def randomize_enemies():
@@ -272,6 +316,17 @@ class Cell:
             cell.is_enemy = True
             if Game.DEBUGGING:
                 cell.label_obj.configure(bg="red") # DEBUG
+        
+        # checking if there are 0-cells
+        zeroes = [cell for cell in Cell.all
+                  if (cell.surrounded_cells_enemies_length == 0
+                      and not cell.is_enemy)]
+        if len(zeroes) == 0:
+            print("all cells redone")
+            for cell in Cell.all:
+                cell.is_enemy = False
+            Cell.randomize_enemies()
+
         
     @staticmethod
     def reveal_all(show_enemies = True):
