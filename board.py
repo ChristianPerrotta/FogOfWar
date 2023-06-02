@@ -209,16 +209,23 @@ class Cell:
             bigger_lord =  lord_cell.resize((64, 64), resample=Image.Resampling.NEAREST)
             Cell.lord_tile = ImageTk.PhotoImage(bigger_lord)
 
-    def left_click(self, *event):
-        if not Game.lost_or_won:
+    def left_click(self, *event, show_num = True):
+        if not Game.lost_or_won and not self.is_opened:
             if self.is_enemy:
                 self.show_enemy()
             else:
-                Audio.left_click()
-                self.show_cell()
+                if show_num:
+                    Audio.left_click()
+                if self.is_flagged:
+                    Cell.enemy_count += 1
+                    Text.enemies_text.label_obj.configure(
+                        text=f"ENEMIES LEFT\n{Cell.enemy_count}")
+
+                    self.is_flagged = False
+                self.show_cell(show_num)
                 if self.surrounded_cells_enemies_length == 0:
                     for cell_obj in self.surrounded_cells:
-                        cell_obj.show_cell(False)
+                        cell_obj.left_click(show_num = False)
 
     def get_cell_by_axis(self, x, y):
         for cell in Cell.all:
