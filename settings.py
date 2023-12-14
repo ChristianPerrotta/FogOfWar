@@ -12,6 +12,6 @@ FONT_UNDER = ("Lucida Sans Typewriter", 20, "underline")
 DIFFICULTIES = ["Normal", "Hard", "Lunatic", "Infernal"]
 STYLES = ["FE1", "FE2", "FE3", "FE4", "FE5", "FE6", "FE7", "FE8"]
 
-TILESET_PATH = path.dirname(__file__)+r"\all_tilesets.png"
+TILESET_PATH = path.dirname(__file__)+r"\images\all_tilesets.png"
 
 SOUND_PATH = path.dirname(__file__) + "\sounds\\"
